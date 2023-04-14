@@ -6,6 +6,10 @@ import {
   Setting,
 } from "@element-plus/icons-vue";
 
+import { useRouter } from '@/hooks/common'
+
+const { route } = useRouter()
+
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath);
 };
@@ -25,11 +29,19 @@ const handleClose = (key: string, keyPath: string[]) => {
           :router="true"
           @open="handleOpen"
           @close="handleClose"
-          default-active="/"
+          :default-active="route.path"
         >
           <el-menu-item index="/">
             <el-icon><icon-menu /></el-icon>
             <span>天空盒</span>
+          </el-menu-item>
+          <el-menu-item index="/module">
+            <el-icon><icon-menu /></el-icon>
+            <span>模型点选</span>
+          </el-menu-item>
+          <el-menu-item index="/highlightule">
+            <el-icon><icon-menu /></el-icon>
+            <span>模型高亮</span>
           </el-menu-item>
         </el-menu>
       </el-aside>

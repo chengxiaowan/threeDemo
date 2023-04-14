@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted,onUnmounted } from "vue";
 import { CubeTextureLoader } from "three";
 import { useThreeJS } from "@/hooks/three";
 import { fromEvent } from "rxjs";
@@ -20,14 +20,15 @@ const {
 } = useThreeJS();
 const name = "index";
 const skyList = [
-  "/public/skybox/posx.jpg",
-  "/public/skybox/negx.jpg",
-  "/public/skybox/posy.jpg",
-  "/public/skybox/negy.jpg",
-  "/public/skybox/posz.jpg",
-  "/public/skybox/negz.jpg",
+  "/skybox/posx.jpg",
+  "/skybox/negx.jpg",
+  "/skybox/posy.jpg",
+  "/skybox/negy.jpg",
+  "/skybox/posz.jpg",
+  "/skybox/negz.jpg",
 ];
 
+//窗口重绘订阅
 let resize: any;
 
 /* three场景容器 */
@@ -58,7 +59,7 @@ const createSkyBox = async (scene: THREE.Scene) => {
 const createPlaneGeometryBasicMaterial = async () => {
   let textureLoader = new THREE.TextureLoader();
   let cubeMaterial = new THREE.MeshStandardMaterial({
-    map: textureLoader.load("/public/floor/cd.jpg"),
+    map: textureLoader.load("/floor/cd.jpg"),
   });
   (cubeMaterial.map as THREE.Texture).wrapS = THREE.RepeatWrapping;
   (cubeMaterial.map as THREE.Texture).wrapT = THREE.RepeatWrapping;
@@ -73,7 +74,6 @@ const createPlaneGeometryBasicMaterial = async () => {
 };
 
 onMounted(async () => {
-  console.log(container.value,"DOM")
   try {
     //检测支持
     await checkWebgl();
@@ -88,7 +88,7 @@ onMounted(async () => {
       z: 90,
     });
     //创建控制器
-    controls = await initOrbitControls(camera,10,10000,container);
+    controls = await initOrbitControls(camera, 10, 10000, container);
     //初始化渲染器
     renderer = await initRenderer(container);
 
@@ -110,16 +110,26 @@ onMounted(async () => {
   }
   //监听窗口大小变化实时更改场景
   resize = fromEvent(window, "resize").subscribe((e) => {
-    console.log('重新设置大小')
+    console.log("重新设置大小");
     if (camera) {
-      camera.aspect = container.value.clientWidth / container.value.clientHeight;
+      camera.aspect =
+        container.value.clientWidth / container.value.clientHeight;
       camera.updateProjectionMatrix();
     }
     if (renderer) {
-      renderer.setSize(container.value.clientWidth, container.value.clientHeight);
+      renderer.setSize(
+        container.value.clientWidth,
+        container.value.clientHeight
+      );
     }
   });
 });
+
+onUnmounted(async ()=>{
+  if(resize){
+    resize.unsubscribe()
+  }
+})
 </script>
 
 <style lang="less" scoped>
@@ -127,5 +137,6 @@ onMounted(async () => {
   width: 100%;
   height: calc(100vh - 40px);
   background: #f5f5f5;
+  position: relative;
 }
 </style>
