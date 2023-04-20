@@ -153,13 +153,16 @@ const mouseDown = (event: MouseEvent) => {
   console.log(event, "执行了");
 
   // 获取容器的尺寸
-  const containerWidth = window.innerWidth;
-  const containerHeight = window.innerHeight;
-
+  const containerWidth = container.value.clientWidth;
+  const containerHeight = container.value.clientHeight;
+  //因为是在div中而非window中，所以需要计算偏移量 否则会出现点选错位！！！！
+  const rect = container.value.getBoundingClientRect();
+  const mouseX = event.clientX - rect.left;
+  const mouseY = event.clientY - rect.top;
   // 获取鼠标在容器中的位置
   const mouse = new THREE.Vector2(
-    (event.clientX / containerWidth) * 2 - 1,
-    -(event.clientY / containerHeight) * 2 + 1
+    (mouseX / containerWidth) * 2 - 1,
+    -(mouseY / containerHeight) * 2 + 1
   );
 
   // 通过鼠标位置和相机创建射线

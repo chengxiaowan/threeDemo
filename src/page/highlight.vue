@@ -4,7 +4,16 @@
 
     <div class="tools">
       <div>
-        高亮：<el-switch v-model="highlight" @change="setHiglight(highlight)" />
+        半透明:<el-switch
+          v-model="highlight"
+          @change="setHiglight(highlight)"
+        />
+      </div>
+      <div>
+        边缘高亮:<el-switch
+          v-model="passType"
+          @change="setOutLinePass(passType)"
+        />
       </div>
     </div>
   </div>
@@ -15,11 +24,12 @@ import { ref, onMounted, onUnmounted, watch } from "vue";
 import { CubeTextureLoader } from "three";
 import { useThreeJS } from "@/hooks/three";
 import { fromEvent } from "rxjs";
+
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
-import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+
 const {
   checkWebgl,
   initScene,
@@ -70,6 +80,12 @@ let highlightMaterial: any;
 //outlinePass
 let outlinePass: any;
 
+//composer
+let composer: any;
+
+//是否边缘高亮
+let passType = ref(false)
+
 //创建天空盒子
 const createSkyBox = async (scene: THREE.Scene) => {
   const cubeLoader = new CubeTextureLoader();
@@ -118,6 +134,33 @@ const setHiglight = (type: boolean) => {
   }
 };
 
+//边缘高亮
+const setOutLinePass = (type:boolean)=>{
+  if (type) {
+    outlinePass.selectedObjects = [meshCube]
+  } else {
+    outlinePass.selectedObjects = []
+  }
+}
+
+// 后期处理
+const initPass = async ()=>{
+  //创建一个后去处理工具
+  composer = new EffectComposer(renderer)
+  const renderPass = new RenderPass(scene, camera);
+	composer.addPass(renderPass);
+  //创建边缘通道
+  outlinePass = new OutlinePass(new THREE.Vector2(container.value.clientWidth, container.value.clientHidth), scene, camera);
+	composer.addPass(outlinePass);
+	outlinePass.edgeStrength = 10;//边缘强度
+	outlinePass.edgeGlow = 1;//缓缓接近
+  // outlinePass.edgeColor = new THREE.Color(1, 0, 0);
+  outlinePass.visibleEdgeColor = new THREE.Color(0xff0000);
+	outlinePass.edgeThickness = 4;//边缘厚度
+	outlinePass.pulsePeriod = 2; //脉冲周期
+}
+
+
 onMounted(async () => {
   try {
     //检测支持
@@ -136,6 +179,8 @@ onMounted(async () => {
     controls = await initOrbitControls(camera, 10, 10000, container);
     //初始化渲染器
     renderer = await initRenderer(container);
+    //创建处理通道
+    await initPass()
 
     //给场景添加环境光
     await setAmbient(scene, "#ffffff", 1);
@@ -144,6 +189,8 @@ onMounted(async () => {
     //渲染
     renderer.setAnimationLoop(async () => {
       renderScene(controls, scene, camera, renderer);
+      //设置处理通道到渲染器
+      composer.render();
     });
     await creatCube(scene);
   } catch (error) {
