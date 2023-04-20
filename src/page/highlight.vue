@@ -190,6 +190,7 @@ const initPass = async () => {
   outlinePass.visibleEdgeColor = new THREE.Color("#07cbc9");
   outlinePass.edgeThickness = 4; //边缘厚度
   outlinePass.pulsePeriod = 2; //脉冲周期
+
 };
 
 onMounted(async () => {
