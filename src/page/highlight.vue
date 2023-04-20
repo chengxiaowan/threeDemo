@@ -4,23 +4,42 @@
 
     <div class="tools">
       <div>
-        半透明:<el-switch
-          v-model="highlight"
-          @change="setHiglight(highlight)"
+        半透明:
+        <el-switch v-model="highlight" @change="setHiglight(highlight)" />
+      </div>
+      <div>
+        边缘高亮:
+        <el-switch v-model="passType" @change="setOutLinePass(passType)" />
+      </div>
+      <div>
+        边缘强度:
+        <el-input-number v-model="outlinePassConfig.edgeStrength" :step="0.1" />
+      </div>
+      <div>
+        缓慢出现:
+        <el-switch v-model="outlinePassConfig.edgeGlow" />
+      </div>
+      <div>
+        边缘颜色:
+        <el-color-picker v-model="outlinePassConfig.visibleEdgeColor" />
+      </div>
+      <div>
+        边缘厚度:
+        <el-input-number
+          v-model="outlinePassConfig.edgeThickness"
+          :step="0.1"
         />
       </div>
       <div>
-        边缘高亮:<el-switch
-          v-model="passType"
-          @change="setOutLinePass(passType)"
-        />
+        闪烁速度:
+        <el-input-number v-model="outlinePassConfig.pulsePeriod" :step="1" />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, reactive, onMounted, onUnmounted, watch } from "vue";
 import { CubeTextureLoader } from "three";
 import { useThreeJS } from "@/hooks/three";
 import { fromEvent } from "rxjs";
@@ -84,7 +103,16 @@ let outlinePass: any;
 let composer: any;
 
 //是否边缘高亮
-let passType = ref(false)
+let passType = ref(false);
+
+//outlinePassConfig
+let outlinePassConfig = reactive({
+  edgeStrength: 10, //边缘强度
+  edgeGlow: true, //缓缓接近
+  visibleEdgeColor: "#07cbc9",
+  edgeThickness: 4, //边缘厚度
+  pulsePeriod: 2, //脉冲周期
+});
 
 //创建天空盒子
 const createSkyBox = async (scene: THREE.Scene) => {
@@ -135,31 +163,34 @@ const setHiglight = (type: boolean) => {
 };
 
 //边缘高亮
-const setOutLinePass = (type:boolean)=>{
+const setOutLinePass = (type: boolean) => {
   if (type) {
-    outlinePass.selectedObjects = [meshCube]
+    outlinePass.selectedObjects = [meshCube];
   } else {
-    outlinePass.selectedObjects = []
+    outlinePass.selectedObjects = [];
   }
-}
+};
 
 // 后期处理
-const initPass = async ()=>{
-  //创建一个后去处理工具
-  composer = new EffectComposer(renderer)
+const initPass = async () => {
+  //创建一个后后期处理工具
+  composer = new EffectComposer(renderer);
   const renderPass = new RenderPass(scene, camera);
-	composer.addPass(renderPass);
+  composer.addPass(renderPass);
   //创建边缘通道
-  outlinePass = new OutlinePass(new THREE.Vector2(container.value.clientWidth, container.value.clientHidth), scene, camera);
-	composer.addPass(outlinePass);
-	outlinePass.edgeStrength = 10;//边缘强度
-	outlinePass.edgeGlow = 1;//缓缓接近
+  outlinePass = new OutlinePass(
+    new THREE.Vector2(container.value.clientWidth, container.value.clientHidth),
+    scene,
+    camera
+  );
+  composer.addPass(outlinePass);
+  outlinePass.edgeStrength = 10; //边缘强度
+  outlinePass.edgeGlow = 1; //缓缓接近
   // outlinePass.edgeColor = new THREE.Color(1, 0, 0);
-  outlinePass.visibleEdgeColor = new THREE.Color(0xff0000);
-	outlinePass.edgeThickness = 4;//边缘厚度
-	outlinePass.pulsePeriod = 2; //脉冲周期
-}
-
+  outlinePass.visibleEdgeColor = new THREE.Color("#07cbc9");
+  outlinePass.edgeThickness = 4; //边缘厚度
+  outlinePass.pulsePeriod = 2; //脉冲周期
+};
 
 onMounted(async () => {
   try {
@@ -180,7 +211,7 @@ onMounted(async () => {
     //初始化渲染器
     renderer = await initRenderer(container);
     //创建处理通道
-    await initPass()
+    await initPass();
 
     //给场景添加环境光
     await setAmbient(scene, "#ffffff", 1);
@@ -218,6 +249,18 @@ onUnmounted(async () => {
     resize.unsubscribe();
   }
 });
+
+watch(outlinePassConfig, (newVal, oldVal) => {
+  console.log(newVal);
+  outlinePass.edgeStrength = newVal.edgeStrength; //边缘强度
+  outlinePass.edgeGlow = newVal.edgeGlow ? 1 : 0; //缓缓接近
+  // outlinePass.edgeColor = new THREE.Color(1, 0, 0);
+  outlinePass.visibleEdgeColor = new THREE.Color(
+    newVal.visibleEdgeColor as any
+  );
+  outlinePass.edgeThickness = newVal.edgeThickness; //边缘厚度
+  outlinePass.pulsePeriod = newVal.pulsePeriod; //脉冲周期
+});
 </script>
 
 <style lang="less" scoped>
@@ -236,7 +279,7 @@ onUnmounted(async () => {
     width: 200px;
     padding: 20px;
     position: absolute;
-    z-index: 99999;
+    z-index: 2;
     top: 0;
     right: 0;
     background-color: rgba(0, 0, 0, 0.6);

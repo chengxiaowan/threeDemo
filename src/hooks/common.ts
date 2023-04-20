@@ -7,7 +7,6 @@ interface NavigationParams {
     [key: string]: any;
 }
 
-
 export function useRouter() {
     const router = useVueRouter();
     const route = useVueRoute();
