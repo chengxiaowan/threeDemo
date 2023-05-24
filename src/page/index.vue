@@ -20,12 +20,12 @@ const {
 } = useThreeJS();
 const name = "index";
 const skyList = [
-  "/skybox/posx.jpg",
-  "/skybox/negx.jpg",
-  "/skybox/posy.jpg",
-  "/skybox/negy.jpg",
-  "/skybox/posz.jpg",
-  "/skybox/negz.jpg",
+  "/panorama/px.png",
+  "/panorama/nx.png",
+  "/panorama/py.png",
+  "/panorama/ny.png",
+  "/panorama/pz.png",
+  "/panorama/nz.png",
 ];
 
 //窗口重绘订阅

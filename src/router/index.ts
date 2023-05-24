@@ -25,6 +25,14 @@ const routes = [
       title: "模型选中高亮",
     },
   },
+  {
+    path: "/panorama",
+    name: "panorama",
+    component: () => import("@/page/panorama.vue"),
+    meta: {
+      title: "等距圆柱投射全景图",
+    },
+  },
 ];
 
 export default createRouter({
