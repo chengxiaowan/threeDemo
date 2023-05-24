@@ -80,16 +80,18 @@ export const useThreeJS = () => {
   };
 
   /**
-   * 初始化渲染器
+   * 初始化渲染器并添加到容器中
    * @param container 渲染容器
    * @returns 渲染器对象
    */
   const initRenderer = async (container: Ref<any>) => {
+    console.log(container.value.clientWidth, container.value.clientHeight,"获取的数据")
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
       logarithmicDepthBuffer: true,
     });
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.value.clientWidth, container.value.clientHeight);
     //将渲染器添加到容器中
     container.value.appendChild(renderer.domElement);
