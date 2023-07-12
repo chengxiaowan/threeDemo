@@ -263,7 +263,7 @@ onMounted(async () => {
     scene.add(meshs);
 
     //加载模型
-    module = await loadModule("/public/Gltf/ZhanTing.babylon.gltf");
+    module = await loadModule("/Gltf/ZhanTing.babylon.gltf");
     //输出场景
     console.log(scene);
     //给一个环境光

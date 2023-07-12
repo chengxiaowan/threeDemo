@@ -71,9 +71,9 @@ export const useThreeJS = () => {
     camera: THREE.PerspectiveCamera,
     minDistance: number = 10,
     maxDistance: number = 10000,
-    container:Ref<any>
+    container: Ref<any>
   ) => {
-    const controls = new OrbitControls(camera,container.value);
+    const controls = new OrbitControls(camera, container.value);
     controls.minDistance = minDistance;
     controls.maxDistance = maxDistance;
     return controls;
@@ -85,14 +85,21 @@ export const useThreeJS = () => {
    * @returns 渲染器对象
    */
   const initRenderer = async (container: Ref<any>) => {
-    console.log(container.value.clientWidth, container.value.clientHeight,"获取的数据")
+    console.log(
+      container.value.clientWidth,
+      container.value.clientHeight,
+      "获取的数据"
+    );
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
       logarithmicDepthBuffer: true,
     });
+    renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.value.clientWidth, container.value.clientHeight);
+    //设置rbg颜色和透明度
+
     //将渲染器添加到容器中
     container.value.appendChild(renderer.domElement);
     return renderer;
@@ -111,8 +118,12 @@ export const useThreeJS = () => {
     camera: THREE.PerspectiveCamera,
     renderer: THREE.WebGLRenderer
   ) => {
-    controls.update();
-    renderer.render(scene, camera);
+    if (controls) {
+      controls.update();
+    }
+    if (renderer) {
+      renderer.render(scene, camera);
+    }
   };
 
   /**

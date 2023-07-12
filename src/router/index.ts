@@ -33,6 +33,14 @@ const routes = [
       title: "等距圆柱投射全景图",
     },
   },
+  {
+    path: "/tour",
+    name: "tour",
+    component: () => import("@/page/tour.vue"),
+    meta: {
+      title: "全景模型混合漫游",
+    },
+  }
 ];
 
 export default createRouter({

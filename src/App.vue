@@ -47,6 +47,10 @@ const handleClose = (key: string, keyPath: string[]) => {
             <el-icon><icon-menu /></el-icon>
             <span>等距圆柱投射全景图</span>
           </el-menu-item>
+          <el-menu-item index="/tour">
+            <el-icon><icon-menu /></el-icon>
+            <span>全景模型混合漫游</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-main>
