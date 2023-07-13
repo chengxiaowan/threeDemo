@@ -23,6 +23,20 @@
       >
         重置
       </el-button>
+      <el-button
+        type="primary"
+        @click="cameraInfo"
+        style="margin-left: 20px"
+      >
+        相机信息
+      </el-button>
+      <el-button
+        type="primary"
+        @click="controlInfo"
+        style="margin-left: 20px"
+      >
+        控制器信息
+      </el-button>
     </div>
   </div>
 </template>
@@ -78,18 +92,33 @@ const tourList = ref([
     position: new THREE.Vector3(100, 100, 100),
     name: "场景1",
     id: 1,
+    rotation:{
+      x:-1.532841323544614,
+      y:1.4950186961290388,
+      z:1.5327321939885539
+    }
   },
   {
     path: "/tour/scence2/full.jpg",
     position: new THREE.Vector3(400, 100, 100),
     name: "场景2",
     id: 2,
+    rotation:{
+      x:-2.706083462705002,
+      y:1.079051977815852,
+      z:2.7523480913477414
+    }
   },
   {
     path: "/tour/scence3/full.jpg",
     position: new THREE.Vector3(-200, 100, 100),
     name: "场景3",
     id: 3,
+    rotation:{
+      x:-1.6071606759666162,
+      y:1.4209075744480577,
+      z:1.6075726578763214
+    }
   },
 ]);
 
@@ -153,9 +182,9 @@ const createPlaneGeometryBasicMaterial = async () => {
 const switchScence = (id: number) => {
   const item = tourList.value.find((item) => item.id === id);
   const targetPosition = item
-    ? item.position
+    ? new THREE.Vector3(item.position.x, item.position.y, item.position.z)
     : new THREE.Vector3(500, 500, 500);
-  const targetLookAt = item ? item.position : new THREE.Vector3(0, 0, 0);
+  const targetLookAt = item ? item.rotation : {x:0, y:0, z:0};
 
   //透明所有球体
   // scene.children.forEach((item) => {
@@ -170,6 +199,7 @@ const switchScence = (id: number) => {
     .to(targetPosition, 2000) // 动画持续时间为 2 秒
     .easing(TWEEN.Easing.Quadratic.InOut) // 使用 Quadratic 缓动函数（可根据需求选择其他缓动函数）
     .onUpdate(() => {
+      controls.target.copy(camera.position); // 同时更新 OrbitControls 的 target
       controls.update(); // 更新控制器
     })
     .onComplete(() => {
@@ -177,26 +207,21 @@ const switchScence = (id: number) => {
     })
     .start();
 
-  new TWEEN.Tween(camera.lookAt)
-    .to(targetLookAt, 2000)
-    .easing(TWEEN.Easing.Quadratic.InOut)
-    .onUpdate(() => {
-      controls.target.copy(targetLookAt); // 同时更新 OrbitControls 的 target
-      controls.update(); // 更新控制器
-    })
-    .start();
-
-  // new TWEEN.Tween(controls.position)
-  // .to(targetPosition, 2000)
-  // .easing(TWEEN.Easing.Quadratic.InOut)
-  // .onUpdate(() => {
-  //   controls.update(); // 更新控制器
-  // })
-  // .start();
+    //controls.target移动
+    // new TWEEN.Tween(controls.target)
+    // .to(new THREE.Vector3(targetLookAt.x,targetLookAt.y,targetLookAt.z,), 2000)
+    // .easing(TWEEN.Easing.Quadratic.InOut)
+    // .onComplete(() => {
+    //   controls.enabled = true; // 启用OrbitControls
+    // })
 
   new TWEEN.Tween(camera.rotation)
-    .to({ x: 0, y: 0, z: 0 }, 2000)
+    .to(new THREE.Vector3(targetLookAt.x,targetLookAt.y,targetLookAt.z,), 2000)
     .easing(TWEEN.Easing.Quadratic.InOut)
+    .onComplete(() => {
+      controls.target.copy(camera.position); // 同时更新 OrbitControls 的 target
+      controls.enabled = true; // 启用OrbitControls
+    })
     .start();
 
   //显示所有球体 2秒内淡出淡入
@@ -204,7 +229,7 @@ const switchScence = (id: number) => {
     if (mesh instanceof THREE.Mesh) {
       if (mesh.name === item?.name) {
         new TWEEN.Tween((mesh as any).material)
-          .to({ opacity: 1 }, 2000)
+          .to({ opacity: 1 }, 3000)
           .easing(TWEEN.Easing.Quadratic.InOut)
           .start();
       } else {
@@ -215,6 +240,14 @@ const switchScence = (id: number) => {
       }
     }
   });
+};
+
+const cameraInfo = () => {
+  console.log(camera, "相机信息");
+};
+
+const controlInfo = () => {
+  console.log(controls, "控制器信息");
 };
 
 onMounted(async () => {
