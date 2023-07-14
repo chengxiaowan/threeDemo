@@ -6,9 +6,9 @@ import {
   Setting,
 } from "@element-plus/icons-vue";
 
-import { useRouter } from '@/hooks/common'
+import { useRouter } from "@/hooks/common";
 
-const { route } = useRouter()
+const { route } = useRouter();
 
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath);
@@ -51,6 +51,10 @@ const handleClose = (key: string, keyPath: string[]) => {
             <el-icon><icon-menu /></el-icon>
             <span>全景模型混合漫游</span>
           </el-menu-item>
+          <el-menu-item index="/tour2">
+            <el-icon><icon-menu /></el-icon>
+            <span>全景模型混合漫游2</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-main>
@@ -66,11 +70,11 @@ const handleClose = (key: string, keyPath: string[]) => {
   height: 100%;
 }
 
-.el-aside{
-    padding-top: 20px;
+.el-aside {
+  padding-top: 20px;
 }
 
-.el-menu{
-    height:calc(100vh - 40px)
+.el-menu {
+  height: calc(100vh - 40px);
 }
 </style>

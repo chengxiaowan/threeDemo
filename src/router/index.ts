@@ -40,6 +40,14 @@ const routes = [
     meta: {
       title: "全景模型混合漫游",
     },
+  },
+  {
+    path: "/tour2",
+    name: "tour2",
+    component: () => import("@/page/tour2.vue"),
+    meta: {
+      title: "全景模型混合漫游2",
+    },
   }
 ];
 
