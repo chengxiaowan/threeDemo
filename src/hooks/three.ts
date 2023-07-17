@@ -2,7 +2,8 @@ import * as THREE from "three";
 import WebGL from "three/examples/jsm/capabilities/WebGL";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { ElMessage } from "element-plus";
-import { Ref, ref } from "vue";
+import { Ref, ref,onMounted,onUnmounted } from "vue";
+import stats from 'stats.js'
 
 interface ThreePosition {
   x: number;
@@ -118,11 +119,20 @@ export const useThreeJS = () => {
     camera: THREE.PerspectiveCamera,
     renderer: THREE.WebGLRenderer
   ) => {
+
+    if(statsTools){
+      statsTools.begin()
+    }
+
     if (controls) {
       controls.update();
     }
     if (renderer) {
       renderer.render(scene, camera);
+    }
+
+    if(statsTools){
+      statsTools.end()
     }
   };
 
@@ -150,6 +160,21 @@ export const useThreeJS = () => {
     scene.add(ambient);
   };
 
+  const statsTools = new stats()
+
+  const initStats = async (container: Ref<any>) => {
+    statsTools.showPanel(0)
+    //设置位置
+    statsTools.dom.style.position = 'absolute'
+    statsTools.dom.style.left = '0px'
+    statsTools.dom.style.top = '0px'
+    container.value.appendChild(statsTools.dom)
+  }
+
+  const removeStats = async () => {
+    statsTools.dom.remove()
+  }
+
   return {
     checkWebgl,
     initScene,
@@ -159,6 +184,8 @@ export const useThreeJS = () => {
     renderScene,
     addAxesHelper,
     setAmbient,
+    initStats,
+    removeStats,
     THREE,
   };
 };

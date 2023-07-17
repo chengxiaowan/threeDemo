@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div ref="container" class="container"></div>
-    <div class="select">
+    <div class="select" ref="tools">
       <div style="margin-bottom: 20px">
         <el-button type="primary" @click="cameraInfo" style="margin-left: 20px">
           相机信息
@@ -34,7 +34,7 @@
 
 <script lang="ts" setup>
 //导入vue
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, onUnmounted } from "vue";
 //导入three
 import { useThreeJS } from "@/hooks/three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
@@ -51,10 +51,13 @@ const {
   renderScene,
   addAxesHelper,
   setAmbient,
+  initStats,
+  removeStats,
   THREE,
 } = useThreeJS();
 
 const container = ref();
+const tools = ref();
 
 let scene: THREE.Scene;
 
@@ -427,9 +430,16 @@ onMounted(async () => {
       //   console.log(e);
       mouseDown(e as MouseEvent);
     });
+
+    //初始化帧率显示
+    await initStats(container);
   } catch (e) {
     console.log(e);
   }
+});
+
+onUnmounted(async () => {
+  await removeStats();
 });
 </script>
 
