@@ -28,6 +28,18 @@
           回到模型视图
         </el-button>
       </div>
+
+      <div style="margin-bottom: 20px">
+        <el-button type="primary" @click="listenMousemove">
+          监听鼠标移动
+        </el-button>
+      </div>
+
+      <div style="margin-bottom: 20px">
+        <el-button type="primary" @click="stopListenMousemove">
+          停止监听鼠标移动
+        </el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -78,6 +90,12 @@ const skyPath = [
   "/skybox/posz.jpg",
   "/skybox/negz.jpg",
 ];
+
+//指针贴图建模
+let pointerMesh: any = null;
+let mousemoveSubscription: any = null;
+let pointer: any = null;
+let helper: any = null;
 
 //光线投射点选
 const mouseDown = (event: MouseEvent) => {
@@ -417,6 +435,32 @@ onMounted(async () => {
     // 添加模型到场景
     scene.add(model.scene);
 
+    //添加指针贴图建模
+    pointer = new THREE.Vector2();
+
+    const geometryHelper = new THREE.ConeGeometry( 0.2, 1, 3 );
+    geometryHelper.translate( 0, 0, 0 );
+    geometryHelper.rotateX( Math.PI / 2 );
+    helper = new THREE.Mesh( geometryHelper, new THREE.MeshNormalMaterial() );
+    scene.add( helper );
+
+    new THREE.TextureLoader().load('./spriteImage.png',
+      (texture: THREE.Texture) => {
+        const SIZE = 5;
+        const img = texture.image;
+        let height = (img && img.height) || SIZE;
+        let width = (img && img.width) || SIZE;
+        height = 1 // (SIZE / width) * height;
+        width = 1 // SIZE;
+        const mat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
+        const geom = new THREE.PlaneGeometry(width, height);
+        geom.translate( 0, 0, 0 );
+        pointerMesh = new THREE.Mesh(geom, mat);
+        pointerMesh.name = 'pointer-image'
+        scene.add(pointerMesh);
+      }
+    );
+
     //渲染
     renderer.setAnimationLoop(async () => {
       renderScene(controls, scene, camera, renderer);
@@ -431,6 +475,49 @@ onMounted(async () => {
     console.log(e);
   }
 });
+
+
+//监听鼠标移动事件，将鼠标贴图移动到与建模相交的位置
+const listenMousemove = () => {
+  mousemoveSubscription = fromEvent(document, 'mousemove').subscribe((event: any) => {
+    event.preventDefault()
+
+    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(pointer, camera);
+
+
+    const intersects = raycaster.intersectObjects(scene.children);
+    if (intersects.length > 0) { //选中第一个射线相交的物体
+
+      // helper.visible = true;
+      // let intersect: any = intersects[0]
+      // helper.position.set( 0, 0, 0 );
+      // helper.lookAt(intersect.face.normal);
+      // helper.position.copy(intersect.point);
+
+      pointerMesh.visible = true;
+      let intersect: any = intersects[0]
+      // if (pointerMesh.name == 'pointer-image') {
+      //   intersect = intersects[1];
+      // }
+      pointerMesh.position.set(0, 0, 0);
+      pointerMesh.lookAt(intersect.face.normal);
+      pointerMesh.position.copy(intersect.point);
+
+    } else {
+      pointerMesh.visible = false;
+      // helper.visible = false;
+    }
+  })
+}
+
+const stopListenMousemove = () => {
+  mousemoveSubscription.unsubscribe();
+}
+
+
 </script>
 
 <style lang="less" scoped>
